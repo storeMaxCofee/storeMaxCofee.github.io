@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Muscle & Hustle - 部位別のトレーニング記録、体組成記録とグラフ分析、ヘルスケア連携が可能なiOS向けプレミアム筋トレ記録アプリの公式サイトです。">
+  <title>Muscle & Hustle - プレミアム筋トレ記録・体組成分析アプリ</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Reset & CSS Variables */
+    :root {
+      --bg-color: #08090c;
+      --bg-card: rgba(18, 20, 27, 0.7);
+      --bg-card-hover: rgba(26, 29, 38, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 81, 47, 0.4);
+      --text-main: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      
+      --accent-grad: linear-gradient(135deg, #FF512F 0%, #DD2476 100%);
+      --accent-grad-light: linear-gradient(135deg, rgba(255, 81, 47, 0.15) 0%, rgba(221, 36, 118, 0.15) 100%);
+      --accent-primary: #FF512F;
+      --accent-secondary: #DD2476;
+      --healthkit-color: #ff2d55;
+      
+      --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    /* Background decorative glow */
+    .glow-bg {
+      position: absolute;
+      top: -10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      height: 800px;
+      background: radial-gradient(circle, rgba(255, 81, 47, 0.08) 0%, rgba(221, 36, 118, 0.03) 40%, rgba(0,0,0,0) 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .glow-bg-bottom {
+      position: absolute;
+      bottom: -10%;
+      left: 10%;
+      width: 60vw;
+      height: 600px;
+      background: radial-gradient(circle, rgba(221, 36, 118, 0.05) 0%, rgba(0,0,0,0) 60%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation Bar */
+    header {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8, 9, 12, 0.7);
+    }
+    
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: var(--accent-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent-grad);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon::before {
+      content: "M";
+      color: #fff;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 16px;
+    }
+    
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    
+    .nav-links a:hover {
+      color: var(--text-main);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 80px 0 100px 0;
+      position: relative;
+    }
+    
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 60px;
+      align-items: center;
+    }
+    
+    @media (max-width: 968px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 50px;
+        text-align: center;
+      }
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 100px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      background-color: #10b981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: 64px;
+      line-height: 1.1;
+      font-weight: 800;
+      margin-bottom: 24px;
+      letter-spacing: -2px;
+    }
+    
+    @media (max-width: 640px) {
+      .hero h1 {
+        font-size: 44px;
+      }
+    }
+    
+    .hero h1 span {
+      background: var(--accent-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      max-width: 580px;
+    }
+    
+    @media (max-width: 968px) {
+      .hero-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    
+    @media (max-width: 968px) {
+      .cta-buttons {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .cta-buttons {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+
+    .btn-appstore {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--text-main);
+      color: var(--bg-color);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 15px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 10px 25px rgba(255, 255, 255, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-appstore:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-appstore svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--bg-color);
+    }
+    
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      font-weight: 600;
+      font-size: 15px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* iPhone CSS Mockup */
+    .device-container {
+      display: flex;
+      justify-content: center;
+      perspective: 1000px;
+    }
+    
+    .iphone-mockup {
+      width: 290px;
+      height: 580px;
+      background: #000;
+      border-radius: 44px;
+      border: 10px solid #2d2d30;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 2px rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      transform: rotateY(-10deg) rotateX(5deg);
+      transition: transform 0.5s ease;
+    }
+    
+    .iphone-mockup:hover {
+      transform: rotateY(0deg) rotateX(0deg) translateY(-5px);
+    }
+    
+    /* Dynamic Notch */
+    .notch {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 24px;
+      background: #000;
+      border-radius: 100px;
+      z-index: 10;
+    }
+    
+    /* Screen contents */
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: #0d0e12;
+      padding: 44px 16px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      font-size: 11px;
+    }
+    
+    .screen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .screen-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+    }
+    
+    .healthkit-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 45, 85, 0.12);
+      border: 1px solid rgba(255, 45, 85, 0.2);
+      color: var(--healthkit-color);
+      font-size: 9px;
+      padding: 3px 8px;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+
+    .healthkit-badge svg {
+      width: 8px;
+      height: 8px;
+      fill: var(--healthkit-color);
+    }
+
+    /* Mockup Widgets */
+    .mock-widget {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .widget-title {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Workout log mockup */
+    .mock-exercise {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 8px;
+      border-radius: 8px;
+      margin-top: 4px;
+    }
+    
+    .ex-info {
+      font-weight: 600;
+    }
+    
+    .ex-detail {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+    
+    .ex-stats {
+      font-family: var(--font-display);
+      background: var(--accent-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+    }
+
+    /* Weight Tracker Graph */
+    .mock-graph {
+      height: 80px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding-top: 10px;
+      position: relative;
+    }
+
+    .graph-line-svg {
+      position: absolute;
+      top: 15px;
+      left: 0;
+      width: 100%;
+      height: 55px;
+    }
+
+    .graph-bar {
+      width: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 4px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .graph-label {
+      font-size: 8px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Quick Action Button in phone */
+    .mock-add-btn {
+      margin-top: auto;
+      background: var(--accent-grad);
+      color: #fff;
+      padding: 10px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 700;
+      font-family: var(--font-display);
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(255, 81, 47, 0.3);
+    }
+
+    /* Features Grid */
+    .features {
+      padding: 100px 0;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      background: linear-gradient(180deg, rgba(8,9,12,0) 0%, rgba(18,20,27,0.3) 50%, rgba(8,9,12,0) 100%);
+    }
+    
+    .section-title {
+      font-family: var(--font-display);
+      text-align: center;
+      font-size: 38px;
+      font-weight: 800;
+      margin-bottom: 60px;
+      letter-spacing: -1px;
+    }
+    
+    .section-title span {
+      background: var(--accent-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+    
+    @media (max-width: 968px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 40px 30px;
+      border-radius: 20px;
+      backdrop-filter: blur(16px);
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--accent-grad);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--border-hover);
+      box-shadow: 0 15px 35px rgba(255, 81, 47, 0.08);
+      background: var(--bg-card-hover);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+    
+    .feature-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--accent-grad-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .feature-icon-wrapper svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: var(--accent-primary);
+      stroke-width: 2;
+    }
+
+    .healthkit-icon svg {
+      stroke: var(--healthkit-color);
+    }
+    .healthkit-icon {
+      background: rgba(255, 45, 85, 0.1);
+    }
+    
+    .feature-card h3 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Support Section */
+    .support {
+      padding: 100px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .support-card {
+      max-width: 600px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 50px 40px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+
+    .support-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    .support-card h2 {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .support-card p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    .btn-x-twitter {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #f3f4f6;
+      color: #000;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 15px;
+      padding: 14px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .btn-x-twitter:hover {
+      transform: translateY(-2px);
+      background-color: #ffffff;
+    }
+
+    .btn-x-twitter svg {
+      width: 16px;
+      height: 16px;
+      fill: #000;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 40px 0;
+      background: #050608;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    @media (max-width: 640px) {
+      .footer-content {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+    }
+
+    .footer-copyright {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-bg"></div>
+  <div class="glow-bg-bottom"></div>
+
+  <!-- Navigation Bar -->
+  <header>
+    <div class="container nav-container">
+      <div class="logo">
+        <div class="logo-icon"></div>
+        Muscle & Hustle
+      </div>
+      <nav class="nav-links">
+        <a href="#support">サポート問い合わせ</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <div class="badge">
+          <div class="badge-dot"></div>
+          App Storeで配信中 (iOS 16+)
+        </div>
+        <h1>
+          毎日のワークアウトを<br>
+          <span>もっとスマートに記録。</span>
+        </h1>
+        <p class="hero-subtitle">
+          Muscle & Hustle（マッスル＆ハッスル）は、部位別のトレーニング内容、日々の体組成記録、ヘルスケア連携がシームレスに行えるモダンな筋トレ管理アプリです。あなたの努力をビジュアル化します。
+        </p>
+        <div class="cta-buttons">
+          <a href="#" id="appstore-link" class="btn-appstore">
+            <svg viewBox="0 0 512 512">
+              <path d="M186.1 192.6c0 14.8-2 29.3-6 43.1-4 13.8-9.9 26.2-17.6 37.1-7.7 10.9-17 19.3-27.9 25.1-10.9 5.8-23.1 8.7-36.6 8.7-12.9 0-24.8-2.6-35.8-7.9-10.9-5.3-20.3-12.4-28.1-21.4C26.3 268 20.3 257.6 16.3 246c-4-11.6-6-23.8-6-36.6s2-25 6-36.6c4-11.6 9.9-22 17.6-31.1 7.7-9.1 17-16.1 28.1-21.2C73 115.4 85 112.8 98 112.8c13.5 0 25.7 2.9 36.6 8.7 10.9 5.8 20.2 14.2 27.9 25.1 7.7 10.9 13.6 23.3 17.6 37.1 4.1 13.8 6 28.3 6 43.1zM501.9 303h-72.7c-2 8.4-5.3 16.4-9.9 24.1-4.6 7.7-10.4 14.3-17.3 19.9-6.9 5.6-14.8 9.9-23.7 13.1-8.9 3.2-18.4 4.8-28.5 4.8-9.4 0-18.2-1.4-26.6-4.3-8.4-2.9-15.8-7.1-22.3-12.7s-11.7-12.4-15.6-20.5c-3.9-8.1-6-17.5-6.2-28h222.8c.2-2.1.3-4.5.3-7.2 0-14.8-2.1-29-6.2-42.5s-10.2-25.2-18.3-35.1c-8.1-9.9-18.2-17.6-30.2-23.1C390.6 182.2 377 179.5 362 179.5c-14.8 0-28.3 2.7-40.6 8.1-12.3 5.4-22.8 12.8-31.4 22.3-8.6 9.5-15.2 20.6-19.7 33.3-4.5 12.7-6.7 26.5-6.7 41.3s2.2 28.8 6.7 41.5c4.5 12.7 11.1 23.9 19.7 33.5s19.1 17.2 31.4 22.7c12.3 5.5 25.8 8.3 40.6 8.3 12.9 0 24.9-2.1 36.1-6.4 11.2-4.3 20.9-10.4 29-18.3 8.1-7.9 14.5-17.3 19.1-28.3 4.6-11 7.2-23 7.8-36.1h36.1v-36.4zM320.1 270.8c2-8.1 5.3-15.3 9.9-21.7 4.6-6.4 10.4-11.5 17.3-15.3 6.9-3.8 14.8-5.7 23.7-5.7 9.4 0 17.9 1.9 25.3 5.7s13.4 9 18 15.3c4.6 6.4 7.6 13.6 9 21.7H320.1zM260.6 182.6v236h36.1v-236h-36.1zM238.4 222v196.6h36.1V222h-36.1z"/>
+            </svg>
+            App Store からダウンロード
+          </a>
+          <a href="#features" class="btn-secondary">主な機能を見る</a>
+        </div>
+      </div>
+      
+      <!-- Interactive Phone Mockup -->
+      <div class="device-container">
+        <div class="iphone-mockup" id="iphone-device">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="screen-header">
+              <span class="screen-title">今日のエントリ</span>
+              <div class="healthkit-badge">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                連携中
+              </div>
+            </div>
+
+            <!-- Workout widget -->
+            <div class="mock-widget">
+              <div class="widget-title">ワークアウト記録</div>
+              <div class="mock-exercise">
+                <div>
+                  <div class="ex-info">ベンチプレス</div>
+                  <div class="ex-detail">胸部 / 大胸筋</div>
+                </div>
+                <div class="ex-stats">80kg × 8レップ</div>
+              </div>
+              <div class="mock-exercise">
+                <div>
+                  <div class="ex-info">スクワット</div>
+                  <div class="ex-detail">脚部 / 大腿四頭筋</div>
+                </div>
+                <div class="ex-stats">100kg × 6レップ</div>
+              </div>
+            </div>
+
+            <!-- Weight tracker widget -->
+            <div class="mock-widget" style="margin-bottom: 24px;">
+              <div class="widget-title">体重の推移 (7日間)</div>
+              <div class="mock-graph">
+                <!-- Pure CSS Mock SVG line graph -->
+                <svg class="graph-line-svg" viewBox="0 0 100 50">
+                  <path d="M 0 45 L 16 42 L 32 38 L 48 40 L 64 35 L 80 30 L 100 25" fill="none" stroke="url(#line-grad)" stroke-width="2.5" stroke-linecap="round"/>
+                  <defs>
+                    <linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stop-color="#FF512F" />
+                      <stop offset="100%" stop-color="#DD2476" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="graph-bar"><div class="graph-label">月</div></div>
+                <div class="graph-bar"><div class="graph-label">火</div></div>
+                <div class="graph-bar"><div class="graph-label">水</div></div>
+                <div class="graph-bar"><div class="graph-label">木</div></div>
+                <div class="graph-bar"><div class="graph-label">金</div></div>
+                <div class="graph-bar"><div class="graph-label">土</div></div>
+                <div class="graph-bar"><div class="graph-label">日</div></div>
+              </div>
+            </div>
+
+            <div class="mock-add-btn">+ 新規ワークアウトを追加</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="container">
+      <h2 class="section-title">
+        シンプルで強靭な<span>3つの機能</span>
+      </h2>
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card" id="feature-workout">
+          <div class="feature-icon-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2v20M17 5H7M19 9H5M20 14H4M18 19H6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>部位別のトレーニング記録</h3>
+          <p>
+            胸、背中、脚、肩、腕など部位ごとに細かく種目を整理。前回のセット内容を素早く確認し、負荷の漸進性過負荷（プログレッシブオーバーロード）の計画立案をサポートします。
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card" id="feature-analytics">
+          <div class="feature-icon-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 12h18M3 6h18M3 18h18" stroke-linecap="round"/>
+              <circle cx="6" cy="6" r="1" fill="#FF512F"/>
+              <circle cx="14" cy="12" r="1" fill="#FF512F"/>
+              <circle cx="18" cy="18" r="1" fill="#FF512F"/>
+            </svg>
+          </div>
+          <h3>体組成記録とグラフ分析</h3>
+          <p>
+            体重や体脂肪率の記録に加え、グラフによる変化トレンドが一目でわかります。目標に向けた進捗の正確な把握と、モチベーション向上に貢献します。
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card" id="feature-healthkit">
+          <div class="feature-icon-wrapper healthkit-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>iOSヘルスケア（HealthKit）連携</h3>
+          <p>
+            iOSのHealthKitと連携することで、体重などの体組成データを自動同期。アプリ内で入力した情報がiOS標準のヘルスケアにも安全に書き込まれます。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Support Section -->
+  <section class="support" id="support">
+    <div class="container">
+      <div class="support-card">
+        <h2>サポート ＆ お問い合わせ</h2>
+        <p>
+          アプリの使用方法に関するご質問、バグ報告、または新機能のリクエストなどがありましたら、公式X（旧Twitter）アカウントのダイレクトメッセージまでお気軽にお問い合わせください。
+        </p>
+        <a href="https://x.com/muscleDiary_app" target="_blank" rel="noopener noreferrer" class="btn-x-twitter" id="support-link">
+          <svg viewBox="0 0 24 24">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+          @muscleDiary_app をフォローする
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-content">
+      <p class="footer-copyright" id="copyright">
+        &copy; 2026 Muscle & Hustle. All Rights Reserved.
+      </p>
+      <div class="footer-links">
+        <a href="privacy.html" id="privacy-link">プライバシーポリシー</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
